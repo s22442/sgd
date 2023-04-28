@@ -35,7 +35,7 @@ public:
             throw std::invalid_argument("Could not load bmp");
         }
 
-        SDL_SetColorKey(bmp, SDL_TRUE, 0x0ff00ff);
+        SDL_SetColorKey(bmp, SDL_TRUE, 0x0ffffff);
         auto *texture = SDL_CreateTextureFromSurface(renderer, bmp);
         if (!texture) {
             throw std::invalid_argument("Could not create texture");
@@ -67,7 +67,9 @@ public:
     }
 
     auto set_position_x(double x) {
-        if (x < 0 || x >= WINDOW_WIDTH) {
+        auto half_width = this->rect.w / 2;
+
+        if (x < half_width || x >= WINDOW_WIDTH - half_width) {
             return;
         }
 
@@ -75,7 +77,9 @@ public:
     }
 
     auto set_position_y(double y) {
-        if (y < 0 || y >= WINDOW_HEIGHT) {
+        auto half_height = this->rect.w / 2;
+
+        if (y < half_height || y >= WINDOW_HEIGHT - half_height) {
             return;
         }
 
@@ -83,27 +87,106 @@ public:
     }
 
     auto render() {
-        this->rect.x = this->position_x - rect.w / 2;
-        this->rect.y = this->position_y - rect.h / 2;
+        this->rect.x = this->position_x - this->rect.w / 2;
+        this->rect.y = this->position_y - this->rect.h / 2;
 
         SDL_RenderCopyEx(this->renderer,
                          this->texture,
                          nullptr,
                          &this->rect,
-                         180.0 * this->angle / M_PI,
+                         this->angle,
                          nullptr,
                          SDL_FLIP_NONE);
     }
 
-    auto destroy() {
+    ~GameObject() {
         SDL_DestroyTexture(this->texture);
+    }
+
+    virtual void handleColision(GameObject &otherObject) = 0;
+};
+
+class Ball : public GameObject {
+public:
+    Ball(
+        SDL_Renderer *renderer,
+        double angle,
+        double position_x,
+        double position_y) : GameObject(renderer,
+                                        angle,
+                                        position_x,
+                                        position_y,
+                                        "ball.bmp") {
+    }
+
+    void handleColision(GameObject &otherObject) {
+    }
+};
+
+class Platform : public GameObject {
+public:
+    Platform(
+        SDL_Renderer *renderer,
+        double angle,
+        double position_x,
+        double position_y) : GameObject(renderer,
+                                        angle,
+                                        position_x,
+                                        position_y,
+                                        "platform.bmp") {
+    }
+
+    void handleColision(GameObject &otherObject) {
+    }
+};
+
+class Brick : public GameObject {
+public:
+    Brick(
+        SDL_Renderer *renderer,
+        double angle,
+        double position_x,
+        double position_y) : GameObject(renderer,
+                                        angle,
+                                        position_x,
+                                        position_y,
+                                        "brick.bmp") {
+    }
+
+    void handleColision(GameObject &otherObject) {
+    }
+};
+
+class Wall : public GameObject {
+public:
+    Wall(
+        SDL_Renderer *renderer,
+        double angle,
+        double position_x,
+        double position_y) : GameObject(renderer,
+                                        angle,
+                                        position_x,
+                                        position_y,
+                                        "wall.bmp") {
+    }
+
+    void handleColision(GameObject &otherObject) {
     }
 };
 
 auto play_game(SDL_Renderer *renderer) -> void {
-    auto player = GameObject{renderer, 0, 320, 200, "player.bmp"};
+    auto left_wall = Wall{renderer, 0, 10, WINDOW_HEIGHT / 6};
+    auto right_wall = Wall{renderer, 0, WINDOW_WIDTH - 10, WINDOW_HEIGHT / 6};
+    auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
 
-    int gaming = true;
+    auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
+    auto ball = Ball{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.6};
+
+    auto brick1 = Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3};
+    auto brick2 = Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3};
+    auto brick3 = Brick{renderer, 0, WINDOW_WIDTH / 2 + 120, WINDOW_HEIGHT * 0.3};
+
+    bool gaming = true;
     while (gaming) {
         auto e = SDL_Event{};
 
@@ -121,34 +204,31 @@ auto play_game(SDL_Renderer *renderer) -> void {
 
         auto *keyboard_state = SDL_GetKeyboardState(nullptr);
 
-        if (keyboard_state[SDL_SCANCODE_UP]) {
-            player.set_position_x(player.get_position_x() + std::cos(player.get_angle()));
-            player.set_position_y(player.get_position_y() + std::sin(player.get_angle()));
-        }
-
-        if (keyboard_state[SDL_SCANCODE_DOWN]) {
-            player.set_position_x(player.get_position_x() - std::cos(player.get_angle()));
-            player.set_position_y(player.get_position_y() - std::sin(player.get_angle()));
-        }
-
         if (keyboard_state[SDL_SCANCODE_LEFT]) {
-            player.set_angle(player.get_angle() - M_PI / 10.0);
+            platform.set_position_x(platform.get_position_x() - 8);
         }
 
         if (keyboard_state[SDL_SCANCODE_RIGHT]) {
-            player.set_angle(player.get_angle() + M_PI / 10.0);
+            platform.set_position_x(platform.get_position_x() + 8);
         }
 
-        SDL_SetRenderDrawColor(renderer, 200, 100, 100, 255);
+        SDL_SetRenderDrawColor(renderer, 20, 20, 60, 255);
         SDL_RenderClear(renderer);
 
-        player.render();
+        left_wall.render();
+        right_wall.render();
+        top_wall.render();
+
+        brick1.render();
+        brick2.render();
+        brick3.render();
+
+        platform.render();
+        ball.render();
 
         SDL_RenderPresent(renderer);
         SDL_Delay(10);
     }
-
-    player.destroy();
 }
 
 int main() {
