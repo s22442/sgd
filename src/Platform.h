@@ -1,4 +1,5 @@
 #include "GameObject.h"
+#include "config.h"
 
 #ifndef PLATFORM_H
 #define PLATFORM_H
@@ -16,7 +17,15 @@ public:
                                         "platform.bmp") {
     }
 
-    void handleColision(GameObject &otherObject) {
+    auto move_left() -> void {
+        this->set_position_x(this->get_position_x() - PLATFORM_SPEED);
+    }
+
+    auto move_right() -> void {
+        this->set_position_x(this->get_position_x() + PLATFORM_SPEED);
+    }
+
+    void handle_colision(GameObject &other_object) {
     }
 };
 

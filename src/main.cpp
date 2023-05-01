@@ -42,12 +42,18 @@ auto play_game(SDL_Renderer *renderer) -> void {
         auto *keyboard_state = SDL_GetKeyboardState(nullptr);
 
         if (keyboard_state[SDL_SCANCODE_LEFT]) {
-            platform.set_position_x(platform.get_position_x() - 8);
+            platform.move_left();
         }
 
         if (keyboard_state[SDL_SCANCODE_RIGHT]) {
-            platform.set_position_x(platform.get_position_x() + 8);
+            platform.move_right();
         }
+
+        ball.update_position();
+
+        ball.detect_and_handle_colision(top_wall);
+        ball.detect_and_handle_colision(left_wall);
+        ball.detect_and_handle_colision(right_wall);
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 60, 255);
         SDL_RenderClear(renderer);

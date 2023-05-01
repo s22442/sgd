@@ -16,7 +16,7 @@ public:
                                         "brick.bmp") {
     }
 
-    void handleColision(GameObject &otherObject) {
+    void handle_colision(GameObject &other_object) {
     }
 };
 

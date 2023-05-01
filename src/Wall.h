@@ -16,7 +16,8 @@ public:
                                         "wall.bmp") {
     }
 
-    void handleColision(GameObject &otherObject) {
+    void handle_colision(GameObject &other_object) {
+        other_object.set_angle(other_object.get_angle() + 180);
     }
 };
 

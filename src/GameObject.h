@@ -7,7 +7,7 @@
 #define GAME_OBJECT_H
 
 class GameObject {
-private:
+protected:
     SDL_Renderer *renderer;
     double angle;
     double position_x;
@@ -59,6 +59,10 @@ public:
         return this->position_y;
     }
 
+    auto get_rect() {
+        return this->rect;
+    }
+
     auto set_angle(double angle) {
         this->angle = angle;
     }
@@ -100,7 +104,7 @@ public:
         SDL_DestroyTexture(this->texture);
     }
 
-    virtual void handleColision(GameObject &otherObject) = 0;
+    virtual void handle_colision(GameObject &other_object) = 0;
 };
 
 #endif // GAME_OBJECT_H
