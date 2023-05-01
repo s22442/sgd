@@ -8,7 +8,7 @@ class Platform : public GameObject {
 public:
     Platform(
         SDL_Renderer *renderer,
-        double angle,
+        int angle,
         double position_x,
         double position_y) : GameObject(renderer,
                                         angle,

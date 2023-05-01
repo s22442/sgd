@@ -17,7 +17,7 @@ auto play_game(SDL_Renderer *renderer) -> void {
     auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
 
     auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
-    auto ball = Ball{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.6};
+    auto ball = Ball{renderer, -30, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.6};
 
     auto brick1 = Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3};
     auto brick2 = Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3};

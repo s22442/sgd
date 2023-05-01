@@ -19,7 +19,7 @@ private:
 public:
     Ball(
         SDL_Renderer *renderer,
-        double angle,
+        int angle,
         double position_x,
         double position_y) : GameObject(renderer,
                                         angle,
@@ -39,7 +39,7 @@ public:
     auto detect_and_handle_colision(GameObject &other_object) -> void {
         auto other_rect = other_object.get_rect();
 
-        auto other_angle = other_object.get_angle();
+        auto other_angle_in_radians = this->degrees_to_radians(other_object.get_angle());
         auto other_x = other_object.get_position_x();
         auto other_y = other_object.get_position_y();
 
@@ -47,14 +47,14 @@ public:
         auto half_other_height = other_rect.h / 2;
 
         auto other_x_radius = half_other_width *
-                                  std::cos(other_angle) +
+                                  std::cos(other_angle_in_radians) +
                               half_other_height *
-                                  std::sin(other_angle);
+                                  std::sin(other_angle_in_radians);
 
         auto other_y_radius = half_other_width *
-                                  std::sin(other_angle) +
+                                  std::sin(other_angle_in_radians) +
                               half_other_height *
-                                  std::cos(other_angle);
+                                  std::cos(other_angle_in_radians);
 
         auto closest_other_x = this->position_x > other_x
                                    ? std::min(this->position_x, other_x + other_x_radius)

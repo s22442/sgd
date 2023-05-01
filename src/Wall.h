@@ -7,7 +7,7 @@ class Wall : public GameObject {
 public:
     Wall(
         SDL_Renderer *renderer,
-        double angle,
+        int angle,
         double position_x,
         double position_y) : GameObject(renderer,
                                         angle,
@@ -17,7 +17,19 @@ public:
     }
 
     void handle_colision(GameObject &other_object) {
-        other_object.set_angle(other_object.get_angle() + 180);
+        auto new_angle = 180 - other_object.get_angle();
+
+        auto vertical_colision = std::abs(
+                                     this->position_x -
+                                     other_object.get_position_x()) >
+                                 std::abs(this->position_y -
+                                          other_object.get_position_y());
+
+        if (vertical_colision) {
+            new_angle += 180;
+        }
+
+        other_object.set_angle(new_angle);
     }
 };
 

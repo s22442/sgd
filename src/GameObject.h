@@ -6,10 +6,14 @@
 #ifndef GAME_OBJECT_H
 #define GAME_OBJECT_H
 
+auto _normalize_angle(int angle) {
+    return (angle + 360) % 360;
+}
+
 class GameObject {
 protected:
     SDL_Renderer *renderer;
-    double angle;
+    int angle;
     double position_x;
     double position_y;
     SDL_Texture *texture;
@@ -18,12 +22,12 @@ protected:
 public:
     GameObject(
         SDL_Renderer *renderer,
-        double angle,
+        int angle,
         double position_x,
         double position_y,
         std::string texture_filename) {
         this->renderer = renderer;
-        this->angle = angle;
+        this->angle = _normalize_angle(angle);
         this->position_x = position_x;
         this->position_y = position_y;
 
@@ -63,8 +67,8 @@ public:
         return this->rect;
     }
 
-    auto set_angle(double angle) {
-        this->angle = angle;
+    auto set_angle(int angle) {
+        this->angle = _normalize_angle(angle);
     }
 
     auto set_position_x(double x) {

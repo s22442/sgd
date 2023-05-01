@@ -7,7 +7,7 @@ class Brick : public GameObject {
 public:
     Brick(
         SDL_Renderer *renderer,
-        double angle,
+        int angle,
         double position_x,
         double position_y) : GameObject(renderer,
                                         angle,
