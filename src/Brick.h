@@ -1,22 +1,19 @@
-#include "GameObject.h"
+#include "ReflectiveObject.h"
 
 #ifndef BRICK_H
 #define BRICK_H
 
-class Brick : public GameObject {
+class Brick : public ReflectiveObject {
 public:
     Brick(
         SDL_Renderer *renderer,
         int angle,
         double position_x,
-        double position_y) : GameObject(renderer,
-                                        angle,
-                                        position_x,
-                                        position_y,
-                                        "brick.bmp") {
-    }
-
-    void handle_colision(GameObject &other_object) {
+        double position_y) : ReflectiveObject(renderer,
+                                              angle,
+                                              position_x,
+                                              position_y,
+                                              "brick.bmp") {
     }
 };
 

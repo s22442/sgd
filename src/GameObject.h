@@ -1,5 +1,6 @@
 #include "config.h"
 #include <SDL.h>
+#include <cmath>
 #include <memory>
 #include <string>
 
@@ -18,6 +19,10 @@ protected:
     double position_y;
     SDL_Texture *texture;
     SDL_Rect rect;
+
+    auto degrees_to_radians(double degrees) -> double {
+        return degrees * (M_PI / 180);
+    }
 
 public:
     GameObject(
@@ -53,6 +58,10 @@ public:
 
     auto get_angle() {
         return this->angle;
+    }
+
+    auto get_angle_in_radians() -> double {
+        return this->degrees_to_radians(this->angle);
     }
 
     auto get_position_x() {
@@ -104,11 +113,40 @@ public:
                          SDL_FLIP_NONE);
     }
 
+    auto calculate_closest_inner_point(double target_x, double target_y) -> std::pair<int, int> {
+        auto rect = this->get_rect();
+
+        auto angle_in_radians = this->get_angle_in_radians();
+        auto x = this->get_position_x();
+        auto y = this->get_position_y();
+
+        auto half_width = rect.w / 2;
+        auto half_height = rect.h / 2;
+
+        auto x_radius = half_width *
+                            std::cos(angle_in_radians) +
+                        half_height *
+                            std::sin(angle_in_radians);
+
+        auto y_radius = half_width *
+                            std::sin(angle_in_radians) +
+                        half_height *
+                            std::cos(angle_in_radians);
+
+        auto closest_x = target_x > x
+                             ? std::min(target_x, x + x_radius)
+                             : std::max(target_x, x - x_radius);
+
+        auto closest_y = target_y > y
+                             ? std::min(target_y, y + y_radius)
+                             : std::max(target_y, y - y_radius);
+
+        return {closest_x, closest_y};
+    }
+
     ~GameObject() {
         SDL_DestroyTexture(this->texture);
     }
-
-    virtual void handle_colision(GameObject &other_object) = 0;
 };
 
 #endif // GAME_OBJECT_H

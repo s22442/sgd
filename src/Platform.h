@@ -1,20 +1,20 @@
-#include "GameObject.h"
+#include "CollisionObject.h"
 #include "config.h"
 
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-class Platform : public GameObject {
+class Platform : public CollisionObject {
 public:
     Platform(
         SDL_Renderer *renderer,
         int angle,
         double position_x,
-        double position_y) : GameObject(renderer,
-                                        angle,
-                                        position_x,
-                                        position_y,
-                                        "platform.bmp") {
+        double position_y) : CollisionObject(renderer,
+                                             angle,
+                                             position_x,
+                                             position_y,
+                                             "platform.bmp") {
     }
 
     auto move_left() -> void {
@@ -25,7 +25,7 @@ public:
         this->set_position_x(this->get_position_x() + PLATFORM_SPEED);
     }
 
-    void handle_colision(GameObject &other_object) {
+    void handle_colision(GameObject &ball) {
     }
 };
 

@@ -17,7 +17,7 @@ auto play_game(SDL_Renderer *renderer) -> void {
     auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
 
     auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
-    auto ball = Ball{renderer, -30, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.6};
+    auto ball = Ball{renderer, -28, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.6};
 
     auto brick1 = Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3};
     auto brick2 = Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3};
@@ -54,6 +54,9 @@ auto play_game(SDL_Renderer *renderer) -> void {
         ball.detect_and_handle_colision(top_wall);
         ball.detect_and_handle_colision(left_wall);
         ball.detect_and_handle_colision(right_wall);
+        ball.detect_and_handle_colision(brick1);
+        ball.detect_and_handle_colision(brick2);
+        ball.detect_and_handle_colision(brick3);
 
         SDL_SetRenderDrawColor(renderer, 20, 20, 60, 255);
         SDL_RenderClear(renderer);
