@@ -7,7 +7,7 @@ class CollisionObject : public GameObject {
 public:
     CollisionObject(
         SDL_Renderer *renderer,
-        int angle,
+        double angle,
         double position_x,
         double position_y,
         std::string texture_filename) : GameObject(renderer,

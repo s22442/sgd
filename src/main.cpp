@@ -8,20 +8,34 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <random>
 
 #define SDL_MAIN_HANDLED
 
-auto play_game(SDL_Renderer *renderer) -> void {
-    auto left_wall = Wall{renderer, 0, 10, WINDOW_HEIGHT / 6};
-    auto right_wall = Wall{renderer, 0, WINDOW_WIDTH - 10, WINDOW_HEIGHT / 6};
-    auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
+auto _rd = std::random_device{};
+auto _rgen = std::mt19937{_rd()};
 
-    auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
-    auto ball = Ball{renderer, -28, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.6};
+auto random_initial_ball_angle() -> double {
+    return std::uniform_int_distribution<int>{
+        70,
+        110}(_rgen);
+}
+
+auto play_game(SDL_Renderer *renderer) -> void {
+    auto left_wall = Wall{renderer, 0, 10, WINDOW_HEIGHT / 5};
+    auto right_wall = Wall{renderer, 0, WINDOW_WIDTH - 10, WINDOW_HEIGHT / 5};
+    auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
 
     auto brick1 = Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3};
     auto brick2 = Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3};
     auto brick3 = Brick{renderer, 0, WINDOW_WIDTH / 2 + 120, WINDOW_HEIGHT * 0.3};
+
+    auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
+    auto ball = Ball{
+        renderer,
+        random_initial_ball_angle(),
+        WINDOW_WIDTH / 2,
+        WINDOW_HEIGHT * 0.5};
 
     bool gaming = true;
     while (gaming) {
@@ -51,6 +65,7 @@ auto play_game(SDL_Renderer *renderer) -> void {
 
         ball.update_position();
 
+        ball.detect_and_handle_colision(platform);
         ball.detect_and_handle_colision(top_wall);
         ball.detect_and_handle_colision(left_wall);
         ball.detect_and_handle_colision(right_wall);

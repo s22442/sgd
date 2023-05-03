@@ -2,16 +2,20 @@
 #include "GameObject.h"
 #include "config.h"
 #include <cmath>
+#include <iostream>
 
 #ifndef BALL_H
 #define BALL_H
 
 class Ball : public GameObject {
+private:
+    int collision_lock_object_id = -1;
+    int speed = INITIAL_BALL_SPEED;
 
 public:
     Ball(
         SDL_Renderer *renderer,
-        int angle,
+        double angle,
         double position_x,
         double position_y) : GameObject(renderer,
                                         angle,
@@ -20,15 +24,15 @@ public:
                                         "ball.bmp") {
     }
 
-    auto update_position(int speed = BALL_SPEED) -> void {
+    auto update_position() -> void {
         this->set_position_x(
-            this->position_x + (std::cos(this->get_angle_in_radians()) * speed));
+            this->position_x + (std::cos(this->get_angle_in_radians()) * this->speed));
 
         this->set_position_y(
-            this->position_y + (std::sin(this->get_angle_in_radians()) * speed));
+            this->position_y + (std::sin(this->get_angle_in_radians()) * this->speed));
     }
 
-    auto calculate_distance(CollisionObject &other_object) {
+    auto calculate_distance(CollisionObject &other_object) -> double {
         auto [closest_other_x,
               closest_other_y] = other_object.calculate_closest_inner_point(this->position_x,
                                                                             this->position_y);
@@ -41,11 +45,26 @@ public:
     }
 
     auto detect_and_handle_colision(CollisionObject &other_object) -> void {
+        auto half_width = this->rect.w / 2;
         auto distance = this->calculate_distance(other_object);
 
-        if (distance <= this->rect.w / 2) {
-            other_object.handle_colision(*this);
-            this->update_position(1);
+        if (distance > half_width) {
+            if (this->collision_lock_object_id == other_object.get_id()) {
+                this->collision_lock_object_id = -1;
+            }
+
+            return;
+        }
+
+        if (this->collision_lock_object_id != -1) {
+            return;
+        }
+
+        other_object.handle_colision(*this);
+        this->collision_lock_object_id = other_object.get_id();
+
+        if (this->speed == INITIAL_BALL_SPEED) {
+            this->speed = BALL_SPEED;
         }
     }
 };

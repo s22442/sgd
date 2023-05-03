@@ -9,7 +9,7 @@ class ReflectiveObject : public CollisionObject {
 public:
     ReflectiveObject(
         SDL_Renderer *renderer,
-        int angle,
+        double angle,
         double position_x,
         double position_y,
         std::string texture_filename) : CollisionObject(renderer,
@@ -22,6 +22,9 @@ public:
     void handle_colision(GameObject &ball) {
         auto ball_x = ball.get_position_x();
         auto ball_y = ball.get_position_y();
+        auto ball_rect = ball.get_rect();
+        auto ball_w = ball_rect.w;
+        auto ball_h = ball_rect.h;
 
         auto new_angle = 180 - ball.get_angle();
 
@@ -29,11 +32,11 @@ public:
               closest_y] = this->calculate_closest_inner_point(ball_x,
                                                                ball_y);
 
-        auto x_overlaps = closest_x <= ball_x &&
-                          closest_x >= ball_x - BALL_SPEED;
+        auto x_overlaps = closest_x <= ball_x + ball_w &&
+                          closest_x >= ball_x - ball_w;
 
-        auto y_overlaps = closest_y <= ball_y &&
-                          closest_y >= ball_y - BALL_SPEED;
+        auto y_overlaps = closest_y <= ball_y + ball_h &&
+                          closest_y >= ball_y - ball_h;
 
         auto vertical_collision = (x_overlaps && !y_overlaps) ||
                                   (x_overlaps && std::abs(closest_x - ball_x) < std::abs(closest_y - ball_y));

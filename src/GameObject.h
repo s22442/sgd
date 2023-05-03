@@ -7,14 +7,27 @@
 #ifndef GAME_OBJECT_H
 #define GAME_OBJECT_H
 
-auto _normalize_angle(int angle) {
-    return (angle + 360) % 360;
+auto _normalize_angle(double angle) {
+    auto normalized_angle = std::abs(angle);
+
+    while (normalized_angle > 360) {
+        normalized_angle -= 360;
+    }
+
+    if (angle < 0) {
+        normalized_angle = 360 - normalized_angle;
+    }
+
+    return normalized_angle;
 }
+
+auto _game_object_instance_count = 0;
 
 class GameObject {
 protected:
+    int id;
     SDL_Renderer *renderer;
-    int angle;
+    double angle;
     double position_x;
     double position_y;
     SDL_Texture *texture;
@@ -27,10 +40,12 @@ protected:
 public:
     GameObject(
         SDL_Renderer *renderer,
-        int angle,
+        double angle,
         double position_x,
         double position_y,
         std::string texture_filename) {
+        this->id = _game_object_instance_count++;
+
         this->renderer = renderer;
         this->angle = _normalize_angle(angle);
         this->position_x = position_x;
@@ -56,6 +71,10 @@ public:
         this->rect = SDL_Rect{0, 0, w, h};
     }
 
+    auto get_id() {
+        return this->id;
+    }
+
     auto get_angle() {
         return this->angle;
     }
@@ -76,7 +95,7 @@ public:
         return this->rect;
     }
 
-    auto set_angle(int angle) {
+    auto set_angle(double angle) {
         this->angle = _normalize_angle(angle);
     }
 
@@ -113,15 +132,16 @@ public:
                          SDL_FLIP_NONE);
     }
 
-    auto calculate_closest_inner_point(double target_x, double target_y) -> std::pair<int, int> {
+    auto calculate_closest_inner_point(double target_x, double target_y)
+        -> std::pair<double, double> {
         auto rect = this->get_rect();
 
         auto angle_in_radians = this->get_angle_in_radians();
         auto x = this->get_position_x();
         auto y = this->get_position_y();
 
-        auto half_width = rect.w / 2;
-        auto half_height = rect.h / 2;
+        auto half_width = rect.w / 2.0;
+        auto half_height = rect.h / 2.0;
 
         auto x_radius = half_width *
                             std::cos(angle_in_radians) +
@@ -133,13 +153,28 @@ public:
                         half_height *
                             std::cos(angle_in_radians);
 
-        auto closest_x = target_x > x
-                             ? std::min(target_x, x + x_radius)
-                             : std::max(target_x, x - x_radius);
+        auto min_boundary_x = x - x_radius;
+        auto max_boundary_x = x + x_radius;
+        auto min_boundary_y = y - y_radius;
+        auto max_boundary_y = y + y_radius;
 
-        auto closest_y = target_y > y
-                             ? std::min(target_y, y + y_radius)
-                             : std::max(target_y, y - y_radius);
+        auto closest_x = std::abs(target_x - min_boundary_x) <
+                                 std::abs(target_x - max_boundary_x)
+                             ? min_boundary_x
+                             : max_boundary_x;
+
+        auto closest_y = std::abs(target_y - min_boundary_y) <
+                                 std::abs(target_y - max_boundary_y)
+                             ? min_boundary_y
+                             : max_boundary_y;
+
+        if (target_x < max_boundary_x && target_x > min_boundary_x) {
+            closest_x = target_x;
+        }
+
+        if (target_y < max_boundary_y && target_y > min_boundary_y) {
+            closest_y = target_y;
+        }
 
         return {closest_x, closest_y};
     }

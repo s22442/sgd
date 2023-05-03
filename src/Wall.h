@@ -7,7 +7,7 @@ class Wall : public ReflectiveObject {
 public:
     Wall(
         SDL_Renderer *renderer,
-        int angle,
+        double angle,
         double position_x,
         double position_y) : ReflectiveObject(renderer,
                                               angle,

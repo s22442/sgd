@@ -7,7 +7,7 @@ class Brick : public ReflectiveObject {
 public:
     Brick(
         SDL_Renderer *renderer,
-        int angle,
+        double angle,
         double position_x,
         double position_y) : ReflectiveObject(renderer,
                                               angle,
