@@ -114,11 +114,16 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
         }
 
         for (auto &brick : bricks) {
-            if (brick.is_destroyed()) {
-                continue;
-            }
-
             ball.detect_and_handle_colision(brick);
+        }
+
+        auto i = 0;
+        while (i < bricks.size()) {
+            if (bricks[i].is_destroyed()) {
+                bricks.erase(bricks.begin() + i);
+            } else {
+                i++;
+            }
         }
 
         SDL_SetRenderDrawColor(renderer.get(), 20, 20, 60, 255);
@@ -132,10 +137,6 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
         }
 
         for (auto &brick : bricks) {
-            if (brick.is_destroyed()) {
-                continue;
-            }
-
             brick.render();
         }
 
