@@ -8,7 +8,7 @@
 class Platform : public CollisionObject {
 public:
     Platform(
-        SDL_Renderer *renderer,
+        std::shared_ptr<SDL_Renderer> renderer,
         double angle,
         double position_x,
         double position_y) : CollisionObject(renderer,

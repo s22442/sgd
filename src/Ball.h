@@ -9,12 +9,12 @@
 
 class Ball : public GameObject {
 private:
-    int collision_lock_object_id = -1;
+    int object_collision_lock_id = -1;
     int speed = INITIAL_BALL_SPEED;
 
 public:
     Ball(
-        SDL_Renderer *renderer,
+        std::shared_ptr<SDL_Renderer> renderer,
         double angle,
         double position_x,
         double position_y) : GameObject(renderer,
@@ -48,20 +48,13 @@ public:
         auto half_width = this->rect.w / 2;
         auto distance = this->calculate_distance(other_object);
 
-        if (distance > half_width) {
-            if (this->collision_lock_object_id == other_object.get_id()) {
-                this->collision_lock_object_id = -1;
-            }
-
-            return;
-        }
-
-        if (this->collision_lock_object_id != -1) {
+        if (distance > half_width ||
+            this->object_collision_lock_id == other_object.get_id()) {
             return;
         }
 
         other_object.handle_colision(*this);
-        this->collision_lock_object_id = other_object.get_id();
+        this->object_collision_lock_id = other_object.get_id();
 
         if (this->speed == INITIAL_BALL_SPEED) {
             this->speed = BALL_SPEED;

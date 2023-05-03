@@ -9,6 +9,6 @@ const auto BALL_SPEED = 8;
 
 const auto INITIAL_BALL_SPEED = 4;
 
-const auto PLATFORM_SPEED = 10;
+const auto PLATFORM_SPEED = 12;
 
 #endif // CONFIG_H

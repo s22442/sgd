@@ -26,7 +26,7 @@ auto _game_object_instance_count = 0;
 class GameObject {
 protected:
     int id;
-    SDL_Renderer *renderer;
+    std::shared_ptr<SDL_Renderer> renderer;
     double angle;
     double position_x;
     double position_y;
@@ -39,7 +39,7 @@ protected:
 
 public:
     GameObject(
-        SDL_Renderer *renderer,
+        std::shared_ptr<SDL_Renderer> renderer,
         double angle,
         double position_x,
         double position_y,
@@ -57,7 +57,7 @@ public:
         }
 
         SDL_SetColorKey(bmp, SDL_TRUE, 0x0ffffff);
-        auto *texture = SDL_CreateTextureFromSurface(renderer, bmp);
+        auto *texture = SDL_CreateTextureFromSurface(renderer.get(), bmp);
         if (!texture) {
             throw std::invalid_argument("Could not create texture");
         }
@@ -123,7 +123,7 @@ public:
         this->rect.x = this->position_x - this->rect.w / 2;
         this->rect.y = this->position_y - this->rect.h / 2;
 
-        SDL_RenderCopyEx(this->renderer,
+        SDL_RenderCopyEx(this->renderer.get(),
                          this->texture,
                          nullptr,
                          &this->rect,

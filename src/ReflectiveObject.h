@@ -8,7 +8,7 @@
 class ReflectiveObject : public CollisionObject {
 public:
     ReflectiveObject(
-        SDL_Renderer *renderer,
+        std::shared_ptr<SDL_Renderer> renderer,
         double angle,
         double position_x,
         double position_y,

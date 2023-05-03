@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <random>
+#include <vector>
 
 #define SDL_MAIN_HANDLED
 
@@ -21,14 +22,16 @@ auto random_initial_ball_angle() -> double {
         110}(_rgen);
 }
 
-auto play_game(SDL_Renderer *renderer) -> void {
+auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
     auto left_wall = Wall{renderer, 0, 10, WINDOW_HEIGHT / 5};
     auto right_wall = Wall{renderer, 0, WINDOW_WIDTH - 10, WINDOW_HEIGHT / 5};
     auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
 
-    auto brick1 = Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3};
-    auto brick2 = Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3};
-    auto brick3 = Brick{renderer, 0, WINDOW_WIDTH / 2 + 120, WINDOW_HEIGHT * 0.3};
+    auto bricks = std::array<Brick, 3>{
+        Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3},
+        Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3},
+        Brick{renderer, 0, WINDOW_WIDTH / 2 + 120, WINDOW_HEIGHT * 0.3},
+    };
 
     auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
     auto ball = Ball{
@@ -69,44 +72,72 @@ auto play_game(SDL_Renderer *renderer) -> void {
         ball.detect_and_handle_colision(top_wall);
         ball.detect_and_handle_colision(left_wall);
         ball.detect_and_handle_colision(right_wall);
-        ball.detect_and_handle_colision(brick1);
-        ball.detect_and_handle_colision(brick2);
-        ball.detect_and_handle_colision(brick3);
 
-        SDL_SetRenderDrawColor(renderer, 20, 20, 60, 255);
-        SDL_RenderClear(renderer);
+        for (auto &brick : bricks) {
+            if (brick.is_destroyed()) {
+                continue;
+            }
+
+            ball.detect_and_handle_colision(brick);
+        }
+
+        SDL_SetRenderDrawColor(renderer.get(), 20, 20, 60, 255);
+        SDL_RenderClear(renderer.get());
 
         left_wall.render();
         right_wall.render();
         top_wall.render();
 
-        brick1.render();
-        brick2.render();
-        brick3.render();
+        for (auto &brick : bricks) {
+            if (brick.is_destroyed()) {
+                continue;
+            }
+
+            brick.render();
+        }
 
         platform.render();
         ball.render();
 
-        SDL_RenderPresent(renderer);
+        SDL_RenderPresent(renderer.get());
         SDL_Delay(10);
     }
+}
+
+auto init_window() -> std::shared_ptr<SDL_Window> {
+    auto window = SDL_CreateWindow("SGD",
+                                   SDL_WINDOWPOS_UNDEFINED,
+                                   SDL_WINDOWPOS_UNDEFINED,
+                                   WINDOW_WIDTH, WINDOW_HEIGHT,
+                                   SDL_WINDOW_SHOWN);
+
+    return {window,
+            [](SDL_Window *ptr) {
+                SDL_DestroyWindow(ptr);
+            }};
+}
+
+auto init_renderer(std::shared_ptr<SDL_Window> window)
+    -> std::shared_ptr<SDL_Renderer> {
+    auto renderer = SDL_CreateRenderer(window.get(),
+                                       -1,
+                                       SDL_RENDERER_ACCELERATED |
+                                           SDL_RENDERER_PRESENTVSYNC);
+
+    return {renderer,
+            [](SDL_Renderer *ptr) {
+                SDL_DestroyRenderer(ptr);
+            }};
 }
 
 int main() {
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-
-    SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT,
-                                SDL_WINDOW_SHOWN,
-                                &window,
-                                &renderer);
+    auto window = init_window();
+    auto renderer = init_renderer(window);
 
     play_game(renderer);
 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
     SDL_Quit();
 
     return 0;
