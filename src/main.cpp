@@ -3,7 +3,9 @@
 #include "Platform.h"
 #include "Wall.h"
 #include "config.h"
+#include "utils.h"
 #include <SDL.h>
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -16,42 +18,79 @@
 auto _rd = std::random_device{};
 auto _rgen = std::mt19937{_rd()};
 
-auto random_initial_ball_angle() -> double {
+auto init_random_ball_angle() -> double {
     return std::uniform_int_distribution<int>{
         70,
         110}(_rgen);
 }
 
-auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
-    auto left_wall = Wall{renderer, 0, 10, WINDOW_HEIGHT / 5};
-    auto right_wall = Wall{renderer, 0, WINDOW_WIDTH - 10, WINDOW_HEIGHT / 5};
-    auto top_wall = Wall{renderer, 90, WINDOW_WIDTH / 2, 10};
+auto init_walls(std::shared_ptr<SDL_Renderer> renderer) -> std::array<Wall, 3> {
+    return {
+        Wall{renderer, 90, WINDOW_WIDTH / 2, WALL_EXTENSION},
+        Wall{renderer, 0, WALL_EXTENSION, WINDOW_HEIGHT / 5},
+        Wall{renderer, 0, WINDOW_WIDTH - WALL_EXTENSION, WINDOW_HEIGHT / 5},
+    };
+}
 
-    auto bricks = std::array<Brick, 3>{
-        Brick{renderer, 0, WINDOW_WIDTH / 2 - 120, WINDOW_HEIGHT * 0.3},
-        Brick{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.3},
-        Brick{renderer, 0, WINDOW_WIDTH / 2 + 120, WINDOW_HEIGHT * 0.3},
+auto init_bricks(std::shared_ptr<SDL_Renderer> renderer)
+    -> std::vector<Brick> {
+    auto bricks = std::vector<Brick>{};
+
+    auto first_brick_x = WINDOW_WIDTH / 2 -
+                         (BRICK_CELL_WIDTH * (BRICK_COLS - 1) / 2);
+
+    auto first_brick_y = WALL_EXTENSION +
+                         BRICK_GRID_MARGIN_TOP +
+                         (BRICK_CELL_HEIGHT / 2);
+
+    for (auto row_i : range(BRICK_ROWS)) {
+        for (auto col_i : range(BRICK_COLS)) {
+            bricks.push_back(
+                Brick{
+                    renderer,
+                    0,
+                    (double)(first_brick_x + (col_i * BRICK_CELL_WIDTH)),
+                    (double)(first_brick_y + (row_i * BRICK_CELL_HEIGHT)),
+                });
+        }
+    }
+
+    return bricks;
+}
+
+auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
+    auto walls = init_walls(renderer);
+    auto bricks = init_bricks(renderer);
+
+    auto platform = Platform{
+        renderer,
+        0,
+        WINDOW_WIDTH / 2,
+        WINDOW_HEIGHT * 0.9,
     };
 
-    auto platform = Platform{renderer, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT * 0.9};
     auto ball = Ball{
         renderer,
-        random_initial_ball_angle(),
+        init_random_ball_angle(),
         WINDOW_WIDTH / 2,
-        WINDOW_HEIGHT * 0.5};
+        (double)(WALL_EXTENSION +
+                 BRICK_GRID_MARGIN_TOP +
+                 (BRICK_CELL_HEIGHT * BRICK_ROWS)) +
+            (BRICK_CELL_HEIGHT / 2),
+    };
 
-    bool gaming = true;
-    while (gaming) {
+    bool game_active = true;
+    while (game_active) {
         auto e = SDL_Event{};
 
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
             case SDL_QUIT:
-                gaming = false;
+                game_active = false;
                 break;
             case SDL_KEYDOWN:
                 if (e.key.keysym.sym == SDLK_q)
-                    gaming = false;
+                    game_active = false;
                 break;
             }
         }
@@ -69,9 +108,10 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
         ball.update_position();
 
         ball.detect_and_handle_colision(platform);
-        ball.detect_and_handle_colision(top_wall);
-        ball.detect_and_handle_colision(left_wall);
-        ball.detect_and_handle_colision(right_wall);
+
+        for (auto &wall : walls) {
+            ball.detect_and_handle_colision(wall);
+        }
 
         for (auto &brick : bricks) {
             if (brick.is_destroyed()) {
@@ -84,9 +124,12 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
         SDL_SetRenderDrawColor(renderer.get(), 20, 20, 60, 255);
         SDL_RenderClear(renderer.get());
 
-        left_wall.render();
-        right_wall.render();
-        top_wall.render();
+        ball.render();
+        platform.render();
+
+        for (auto &wall : walls) {
+            wall.render();
+        }
 
         for (auto &brick : bricks) {
             if (brick.is_destroyed()) {
@@ -96,16 +139,13 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
             brick.render();
         }
 
-        platform.render();
-        ball.render();
-
         SDL_RenderPresent(renderer.get());
         SDL_Delay(10);
     }
 }
 
 auto init_window() -> std::shared_ptr<SDL_Window> {
-    auto window = SDL_CreateWindow("SGD",
+    auto window = SDL_CreateWindow("SGD - Yet another lame Breakout clone",
                                    SDL_WINDOWPOS_UNDEFINED,
                                    SDL_WINDOWPOS_UNDEFINED,
                                    WINDOW_WIDTH, WINDOW_HEIGHT,

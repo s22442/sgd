@@ -30,7 +30,7 @@ protected:
     double angle;
     double position_x;
     double position_y;
-    SDL_Texture *texture;
+    std::shared_ptr<SDL_Texture> texture;
     SDL_Rect rect;
 
     auto degrees_to_radians(double degrees) -> double {
@@ -64,7 +64,10 @@ public:
 
         SDL_FreeSurface(bmp);
 
-        this->texture = texture;
+        this->texture = {texture,
+                         [](SDL_Texture *ptr) {
+                             SDL_DestroyTexture(ptr);
+                         }};
 
         int w, h;
         SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
@@ -124,7 +127,7 @@ public:
         this->rect.y = this->position_y - this->rect.h / 2;
 
         SDL_RenderCopyEx(this->renderer.get(),
-                         this->texture,
+                         this->texture.get(),
                          nullptr,
                          &this->rect,
                          this->angle,
@@ -177,10 +180,6 @@ public:
         }
 
         return {closest_x, closest_y};
-    }
-
-    ~GameObject() {
-        SDL_DestroyTexture(this->texture);
     }
 };
 
