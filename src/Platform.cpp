@@ -1,6 +1,6 @@
-#include "CollisionObject.h"
-#include "config.h"
-#include "utils.h"
+#include "CollisionObject.cpp"
+#include "config.cpp"
+#include "utils.cpp"
 #include <iostream>
 
 #ifndef PLATFORM_H

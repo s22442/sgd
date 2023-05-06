@@ -1,5 +1,5 @@
-#include "config.h"
-#include "utils.h"
+#include "config.cpp"
+#include "utils.cpp"
 #include <SDL.h>
 #include <cmath>
 #include <memory>

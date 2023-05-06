@@ -1,4 +1,4 @@
-#include "ReflectiveObject.h"
+#include "ReflectiveObject.cpp"
 
 #ifndef BRICK_H
 #define BRICK_H

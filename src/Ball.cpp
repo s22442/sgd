@@ -1,7 +1,7 @@
-#include "CollisionObject.h"
-#include "GameObject.h"
-#include "Platform.h"
-#include "config.h"
+#include "CollisionObject.cpp"
+#include "GameObject.cpp"
+#include "Platform.cpp"
+#include "config.cpp"
 #include <cmath>
 #include <iostream>
 

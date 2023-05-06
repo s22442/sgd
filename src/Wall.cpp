@@ -1,4 +1,4 @@
-#include "ReflectiveObject.h"
+#include "ReflectiveObject.cpp"
 
 #ifndef WALL_H
 #define WALL_H

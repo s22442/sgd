@@ -1,5 +1,5 @@
-#include "GameObject.h"
-#include "config.h"
+#include "GameObject.cpp"
+#include "config.cpp"
 
 #ifndef MESSAGE_H
 #define MESSAGE_H

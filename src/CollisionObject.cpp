@@ -1,4 +1,4 @@
-#include "GameObject.h"
+#include "GameObject.cpp"
 
 #ifndef COLLISION_OBJECT_H
 #define COLLISION_OBJECT_H

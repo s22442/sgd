@@ -1,5 +1,5 @@
-#include "CollisionObject.h"
-#include "config.h"
+#include "CollisionObject.cpp"
+#include "config.cpp"
 #include <iostream>
 
 #ifndef REFLECTIVE_OBJECT_H
