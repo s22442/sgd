@@ -1,5 +1,6 @@
 #include "CollisionObject.h"
 #include "config.h"
+#include "utils.h"
 #include <iostream>
 
 #ifndef PLATFORM_H
@@ -43,21 +44,15 @@ public:
         auto distance_from_center = std::abs(this->position_x - closest_x);
         auto angle_modifier = 90 * distance_from_center / (this->rect.w / 2);
 
-        if (new_angle < 270) {
-            if (closest_x < this->position_x) {
-                new_angle -= angle_modifier;
-            } else {
-                new_angle += angle_modifier;
-            }
-        } else {
-            if (closest_x < this->position_x) {
-                new_angle += angle_modifier;
-            } else {
-                new_angle -= angle_modifier;
-            }
+        if (closest_x < this->position_x) {
+            angle_modifier *= -1;
         }
 
-        new_angle = std::max(190.0, std::min(350.0, new_angle));
+        new_angle += angle_modifier;
+
+        new_angle = std::max(
+            190.0,
+            std::min(350.0, new_angle));
 
         ball.set_angle(new_angle);
     }

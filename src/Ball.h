@@ -1,5 +1,6 @@
 #include "CollisionObject.h"
 #include "GameObject.h"
+#include "Platform.h"
 #include "config.h"
 #include <cmath>
 #include <iostream>
@@ -61,8 +62,9 @@ public:
         }
     }
 
-    auto is_lost() -> bool {
-        return (this->position_y + (this->rect.h / 2) + 1) >= WINDOW_HEIGHT;
+    auto is_unreachable(Platform &platform) -> bool {
+        return this->position_y >=
+               (platform.get_position_y() + platform.get_rect().h);
     }
 };
 

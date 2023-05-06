@@ -1,4 +1,5 @@
 #include "config.h"
+#include "utils.h"
 #include <SDL.h>
 #include <cmath>
 #include <memory>
@@ -6,20 +7,6 @@
 
 #ifndef GAME_OBJECT_H
 #define GAME_OBJECT_H
-
-auto _normalize_angle(double angle) {
-    auto normalized_angle = std::abs(angle);
-
-    while (normalized_angle > 360) {
-        normalized_angle -= 360;
-    }
-
-    if (angle < 0) {
-        normalized_angle = 360 - normalized_angle;
-    }
-
-    return normalized_angle;
-}
 
 auto _game_object_instance_count = 0;
 
@@ -33,10 +20,6 @@ protected:
     std::shared_ptr<SDL_Texture> texture;
     SDL_Rect rect;
 
-    auto degrees_to_radians(double degrees) -> double {
-        return degrees * (M_PI / 180);
-    }
-
 public:
     GameObject(
         std::shared_ptr<SDL_Renderer> renderer,
@@ -47,7 +30,7 @@ public:
         this->id = _game_object_instance_count++;
 
         this->renderer = renderer;
-        this->angle = _normalize_angle(angle);
+        this->angle = normalize_angle(angle);
         this->position_x = position_x;
         this->position_y = position_y;
 
@@ -83,7 +66,7 @@ public:
     }
 
     auto get_angle_in_radians() -> double {
-        return this->degrees_to_radians(this->angle);
+        return degrees_to_radians(this->angle);
     }
 
     auto get_position_x() {
@@ -99,7 +82,7 @@ public:
     }
 
     auto set_angle(double angle) {
-        this->angle = _normalize_angle(angle);
+        this->angle = normalize_angle(angle);
     }
 
     auto set_position_x(double x) {

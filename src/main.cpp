@@ -5,11 +5,8 @@
 #include "config.h"
 #include "utils.h"
 #include <SDL.h>
-#include <algorithm>
 #include <array>
-#include <cmath>
 #include <iostream>
-#include <memory>
 #include <random>
 #include <vector>
 
@@ -168,7 +165,7 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
                 }
             }
 
-            if (ball.is_lost()) {
+            if (ball.is_unreachable(platform)) {
                 game_state = GameState::FAILURE;
             } else if (!bricks.size()) {
                 game_state = GameState::SUCCESS;
