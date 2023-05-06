@@ -7,7 +7,7 @@ const auto WINDOW_HEIGHT = 600; // px
 
 const auto BALL_SPEED = 8;
 
-const auto INITIAL_BALL_SPEED = 3;
+const auto INITIAL_BALL_SPEED = 4;
 
 const auto PLATFORM_SPEED = 12;
 

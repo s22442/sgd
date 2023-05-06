@@ -58,18 +58,17 @@ auto init_bricks(std::shared_ptr<SDL_Renderer> renderer)
     return bricks;
 }
 
-auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
-    auto walls = init_walls(renderer);
-    auto bricks = init_bricks(renderer);
-
-    auto platform = Platform{
+auto init_platform(std::shared_ptr<SDL_Renderer> renderer) -> Platform {
+    return {
         renderer,
         0,
         WINDOW_WIDTH / 2,
         WINDOW_HEIGHT * 0.9,
     };
+}
 
-    auto ball = Ball{
+auto init_ball(std::shared_ptr<SDL_Renderer> renderer) -> Ball {
+    return {
         renderer,
         init_random_ball_angle(),
         WINDOW_WIDTH / 2,
@@ -78,51 +77,101 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
                  (BRICK_CELL_HEIGHT * BRICK_ROWS)) +
             (BRICK_CELL_HEIGHT / 2),
     };
+}
 
-    bool game_active = true;
-    while (game_active) {
+enum GameState {
+    INIT,
+    IN_PROGRESS,
+    SUCCESS,
+    FAILURE
+};
+
+auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
+    auto walls = init_walls(renderer);
+    auto bricks = init_bricks(renderer);
+    auto platform = init_platform(renderer);
+    auto ball = init_ball(renderer);
+
+    auto game_state = GameState::INIT;
+
+    while (true) {
         auto e = SDL_Event{};
 
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
-            case SDL_QUIT:
-                game_active = false;
+
+            case SDL_QUIT: {
+                return;
+            }
+            case SDL_KEYDOWN: {
+                if (e.key.keysym.sym == SDLK_q) {
+                    return;
+                }
+
+                if (e.key.keysym.sym == SDLK_SPACE) {
+                    switch (game_state) {
+
+                    case GameState::INIT: {
+                        game_state = GameState::IN_PROGRESS;
+                        break;
+                    }
+
+                    case GameState::SUCCESS:
+                    case GameState::FAILURE: {
+                        walls = init_walls(renderer);
+                        bricks = init_bricks(renderer);
+                        platform = init_platform(renderer);
+                        ball = init_ball(renderer);
+                        game_state = GameState::IN_PROGRESS;
+
+                        break;
+                    }
+
+                    default:
+                        break;
+                    }
+                }
                 break;
-            case SDL_KEYDOWN:
-                if (e.key.keysym.sym == SDLK_q)
-                    game_active = false;
-                break;
+            }
             }
         }
 
-        auto *keyboard_state = SDL_GetKeyboardState(nullptr);
+        if (game_state == GameState::IN_PROGRESS) {
+            auto *keyboard_state = SDL_GetKeyboardState(nullptr);
 
-        if (keyboard_state[SDL_SCANCODE_LEFT]) {
-            platform.move_left();
-        }
+            if (keyboard_state[SDL_SCANCODE_LEFT]) {
+                platform.move_left();
+            }
 
-        if (keyboard_state[SDL_SCANCODE_RIGHT]) {
-            platform.move_right();
-        }
+            if (keyboard_state[SDL_SCANCODE_RIGHT]) {
+                platform.move_right();
+            }
 
-        ball.update_position();
+            ball.update_position();
 
-        ball.detect_and_handle_colision(platform);
+            ball.detect_and_handle_colision(platform);
 
-        for (auto &wall : walls) {
-            ball.detect_and_handle_colision(wall);
-        }
+            for (auto &wall : walls) {
+                ball.detect_and_handle_colision(wall);
+            }
 
-        for (auto &brick : bricks) {
-            ball.detect_and_handle_colision(brick);
-        }
+            for (auto &brick : bricks) {
+                ball.detect_and_handle_colision(brick);
+            }
 
-        auto i = 0;
-        while (i < bricks.size()) {
-            if (bricks[i].is_destroyed()) {
-                bricks.erase(bricks.begin() + i);
-            } else {
-                i++;
+            auto i = 0;
+            while (i < bricks.size()) {
+                if (bricks[i].is_destroyed()) {
+                    bricks.erase(bricks.begin() + i);
+                } else {
+                    i++;
+                }
+            }
+
+            if (ball.is_lost()) {
+                game_state = GameState::FAILURE;
+            } else if (!bricks.size()) {
+                game_state = GameState::SUCCESS;
             }
         }
 

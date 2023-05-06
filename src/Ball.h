@@ -60,6 +60,10 @@ public:
             this->speed = BALL_SPEED;
         }
     }
+
+    auto is_lost() -> bool {
+        return (this->position_y + (this->rect.h / 2) + 1) >= WINDOW_HEIGHT;
+    }
 };
 
 #endif // BALL_H
