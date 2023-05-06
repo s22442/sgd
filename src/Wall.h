@@ -1,11 +1,11 @@
-#include "ReflectiveObject.cpp"
+#include "ReflectiveObject.h"
 
 #ifndef WALL_H
 #define WALL_H
 
 class Wall : public ReflectiveObject {
 public:
-    Wall(
+    inline Wall(
         std::shared_ptr<SDL_Renderer> renderer,
         double angle,
         double position_x,
