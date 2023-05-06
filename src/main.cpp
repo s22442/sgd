@@ -1,5 +1,7 @@
 #include "Ball.h"
 #include "Brick.h"
+#include "GameObject.h"
+#include "Message.h"
 #include "Platform.h"
 #include "Wall.h"
 #include "config.h"
@@ -84,6 +86,10 @@ enum GameState {
 };
 
 auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
+    auto init_message = Message{renderer, "game-init.bmp"};
+    auto success_message = Message{renderer, "game-success.bmp"};
+    auto failure_message = Message{renderer, "game-failure.bmp"};
+
     auto walls = init_walls(renderer);
     auto bricks = init_bricks(renderer);
     auto platform = init_platform(renderer);
@@ -133,7 +139,12 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
             }
         }
 
-        if (game_state == GameState::IN_PROGRESS) {
+        SDL_SetRenderDrawColor(renderer.get(), 20, 20, 60, 255);
+        SDL_RenderClear(renderer.get());
+
+        switch (game_state) {
+
+        case GameState::IN_PROGRESS: {
             auto *keyboard_state = SDL_GetKeyboardState(nullptr);
 
             if (keyboard_state[SDL_SCANCODE_LEFT]) {
@@ -170,10 +181,27 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
             } else if (!bricks.size()) {
                 game_state = GameState::SUCCESS;
             }
+
+            break;
         }
 
-        SDL_SetRenderDrawColor(renderer.get(), 20, 20, 60, 255);
-        SDL_RenderClear(renderer.get());
+        case GameState::INIT: {
+            init_message.render();
+            break;
+        }
+
+        case GameState::SUCCESS: {
+            success_message.render();
+            break;
+        }
+        case GameState::FAILURE: {
+            failure_message.render();
+            break;
+        }
+
+        default:
+            break;
+        }
 
         ball.render();
         platform.render();
@@ -195,7 +223,8 @@ auto init_window() -> std::shared_ptr<SDL_Window> {
     auto window = SDL_CreateWindow("SGD - Yet another lame Breakout clone",
                                    SDL_WINDOWPOS_UNDEFINED,
                                    SDL_WINDOWPOS_UNDEFINED,
-                                   WINDOW_WIDTH, WINDOW_HEIGHT,
+                                   WINDOW_WIDTH,
+                                   WINDOW_HEIGHT,
                                    SDL_WINDOW_SHOWN);
 
     return {window,
