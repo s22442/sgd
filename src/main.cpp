@@ -95,6 +95,10 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
     auto platform = init_platform(renderer);
     auto ball = init_ball(renderer);
 
+    auto delta_time = 0.0;
+    auto previous_tick = Uint64{0};
+    auto current_tick = SDL_GetPerformanceCounter();
+
     auto game_state = GameState::INIT;
 
     while (true) {
@@ -215,7 +219,18 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
         }
 
         SDL_RenderPresent(renderer.get());
-        SDL_Delay(10);
+
+        previous_tick = current_tick;
+        current_tick = SDL_GetPerformanceCounter();
+
+        delta_time = std::min(
+            MAX_DELTA_TIME,
+            (
+                (double)(current_tick - previous_tick) /
+                (double)SDL_GetPerformanceFrequency() *
+                1000.0));
+
+        SDL_Delay(TARGET_DELTA_TIME - delta_time);
     }
 }
 
@@ -237,8 +252,7 @@ auto init_renderer(std::shared_ptr<SDL_Window> window)
     -> std::shared_ptr<SDL_Renderer> {
     auto renderer = SDL_CreateRenderer(window.get(),
                                        -1,
-                                       SDL_RENDERER_ACCELERATED |
-                                           SDL_RENDERER_PRESENTVSYNC);
+                                       SDL_RENDERER_ACCELERATED);
 
     return {renderer,
             [](SDL_Renderer *ptr) {

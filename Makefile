@@ -33,7 +33,7 @@ dist/main.o: src/main.cpp
 	$(DIST); $(CC) -c -o dist/main.o src/main.cpp $(CFLAGS)
 
 dist/main: dist/main.o dist/utils.o dist/Ball.o dist/Brick.o dist/CollisionObject.o dist/GameObject.o dist/Message.o dist/Platform.o dist/ReflectiveObject.o
-	$(DIST); $(CC) -o dist/main dist/main.o dist/utils.o dist/Ball.o dist/Brick.o dist/CollisionObject.o dist/GameObject.o dist/Message.o dist/Platform.o dist/ReflectiveObject.o -std=c++17 $(CFLAGS)
+	$(DIST); $(CC) -o dist/main dist/main.o dist/utils.o dist/Ball.o dist/Brick.o dist/CollisionObject.o dist/GameObject.o dist/Message.o dist/Platform.o dist/ReflectiveObject.o $(CFLAGS)
 
 clean:
 	rm -rf dist && mkdir dist
