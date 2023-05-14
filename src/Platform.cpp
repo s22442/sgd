@@ -15,12 +15,14 @@ Platform::Platform(
                                          "platform.bmp") {
 }
 
-auto Platform::move_left() -> void {
-    this->set_position_x(this->get_position_x() - PLATFORM_SPEED);
+auto Platform::move_left(double game_speed_multiplier) -> void {
+    this->set_position_x(
+        this->get_position_x() - (PLATFORM_SPEED * game_speed_multiplier));
 }
 
-auto Platform::move_right() -> void {
-    this->set_position_x(this->get_position_x() + PLATFORM_SPEED);
+auto Platform::move_right(double game_speed_multiplier) -> void {
+    this->set_position_x(
+        this->get_position_x() + (PLATFORM_SPEED * game_speed_multiplier));
 }
 
 void Platform::handle_colision(GameObject &ball) {

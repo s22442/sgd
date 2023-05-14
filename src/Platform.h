@@ -14,9 +14,9 @@ public:
         double position_x,
         double position_y);
 
-    auto move_left() -> void;
+    auto move_left(double game_speed_multiplier) -> void;
 
-    auto move_right() -> void;
+    auto move_right(double game_speed_multiplier) -> void;
 
     void handle_colision(GameObject &ball);
 };

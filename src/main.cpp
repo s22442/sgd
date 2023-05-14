@@ -95,13 +95,21 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
     auto platform = init_platform(renderer);
     auto ball = init_ball(renderer);
 
-    auto delta_time = 0.0;
     auto previous_tick = Uint64{0};
     auto current_tick = SDL_GetPerformanceCounter();
 
     auto game_state = GameState::INIT;
 
     while (true) {
+        previous_tick = current_tick;
+        current_tick = SDL_GetPerformanceCounter();
+
+        auto delta_time = (double)(current_tick - previous_tick) /
+                          (double)SDL_GetPerformanceFrequency() *
+                          1000.0;
+
+        auto game_speed_multiplier = delta_time / TARGET_DELTA_TIME;
+
         auto e = SDL_Event{};
 
         while (SDL_PollEvent(&e)) {
@@ -152,14 +160,14 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
             auto *keyboard_state = SDL_GetKeyboardState(nullptr);
 
             if (keyboard_state[SDL_SCANCODE_LEFT]) {
-                platform.move_left();
+                platform.move_left(game_speed_multiplier);
             }
 
             if (keyboard_state[SDL_SCANCODE_RIGHT]) {
-                platform.move_right();
+                platform.move_right(game_speed_multiplier);
             }
 
-            ball.update_position();
+            ball.update_position(game_speed_multiplier);
 
             ball.detect_and_handle_colision(platform);
 
@@ -219,18 +227,6 @@ auto play_game(std::shared_ptr<SDL_Renderer> renderer) -> void {
         }
 
         SDL_RenderPresent(renderer.get());
-
-        previous_tick = current_tick;
-        current_tick = SDL_GetPerformanceCounter();
-
-        delta_time = std::min(
-            MAX_DELTA_TIME,
-            (
-                (double)(current_tick - previous_tick) /
-                (double)SDL_GetPerformanceFrequency() *
-                1000.0));
-
-        SDL_Delay(TARGET_DELTA_TIME - delta_time);
     }
 }
 

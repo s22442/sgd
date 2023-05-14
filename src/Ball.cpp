@@ -17,12 +17,14 @@ Ball::Ball(
                                     "ball.bmp") {
 }
 
-auto Ball::update_position() -> void {
+auto Ball::update_position(double game_speed_multiplier) -> void {
     this->set_position_x(
-        this->position_x + (std::cos(this->get_angle_in_radians()) * this->speed));
+        this->position_x + (std::cos(this->get_angle_in_radians()) *
+                            (this->speed * game_speed_multiplier)));
 
     this->set_position_y(
-        this->position_y + (std::sin(this->get_angle_in_radians()) * this->speed));
+        this->position_y + (std::sin(this->get_angle_in_radians()) *
+                            (this->speed * game_speed_multiplier)));
 }
 
 auto Ball::calculate_distance(CollisionObject &other_object) -> double {

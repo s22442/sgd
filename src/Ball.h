@@ -21,7 +21,7 @@ public:
         double position_x,
         double position_y);
 
-    auto update_position() -> void;
+    auto update_position(double game_speed_multiplier) -> void;
 
     auto calculate_distance(CollisionObject &other_object) -> double;
 
